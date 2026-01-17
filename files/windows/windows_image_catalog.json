@@ -1,0 +1,121 @@
+[
+  {
+    "IsoId": "WINDOWS_SERVER_2022_EVAL",
+    "IsoDownloadName": "SERVER_EVAL_x64FRE_en-us.iso",
+    "Product": "Windows Server",
+    "Version": "2022",
+    "Channel": "Evaluation",
+    "DownloadUrl": "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US",
+    "Sha256": "3E4FA6D8507B554856FC9CA6079CC402DF11A8B79344871669F0251535255325",
+    "WindowsImages": [
+      { "Name": "Windows Server 2022 Standard Evaluation",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Standard Evaluation (Desktop Experience)",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Datacenter Evaluation",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Datacenter Evaluation (Desktop Experience)",
+        "Autounattend": null }
+    ]
+  },
+  {
+    "IsoId": "OBSOLETE_WINDOWS_SERVER_2022_EVAL",
+    "IsoDownloadName": "20348.169.210806-2348.fe_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso",
+    "Product": "Windows Server",
+    "Version": "2022",
+    "Channel": "Evaluation",
+    "DownloadUrl": "https://software-download.microsoft.com/download/sg/20348.169.210806-2348.fe_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso",
+    "Sha256": "4F1457C4FE14CE48C9B2324924F33CA4F0470475E6DA851B39CCBF98F44E7852",
+    "WindowsImages": [
+      { "Name": "Windows Server 2022 Standard Evaluation",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Standard Evaluation (Desktop Experience)",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Datacenter Evaluation",
+        "Autounattend": null },
+      { "Name": "Windows Server 2022 Datacenter Evaluation (Desktop Experience)",
+        "Autounattend": null }
+    ]
+  },
+  { 
+    "IsoId": "WINDOWS_SERVER_2025_EVAL",
+    "IsoDownloadName": null,
+    "Product": "Windows Server",
+    "Version": "2025",
+    "Channel": "Evaluation",
+    "DownloadUrl": "https://go.microsoft.com/fwlink/?linkid=2293312&clcid=0x409&culture=en-us&country=us",
+    "Sha256": "D0EF4502E350E3C6C53C15B1B3020D38A5DED011BF04998E950720AC8579B23D",
+    "WindowsImages": [
+      { "Name": "Windows Server 2025 Standard Evaluation",
+        "Autounattend": "windows_server_2025_standard_core.xml" },
+      { "Name": "Windows Server 2025 Standard Evaluation (Desktop Experience)",
+        "Autounattend": "windows_server_2025_standard_desktop.xml" },
+      { "Name": "Windows Server 2025 Datacenter Evaluation",
+        "Autounattend": "windows_server_2025_datacenter_core.xml" },
+      { "Name": "Windows Server 2025 Datacenter Evaluation (Desktop Experience)",
+        "Autounattend": "windows_server_2025_datacenter_desktop.xml" }
+    ]
+  },
+  {
+    "IsoId": "WINDOWS_11_25H2_ENTERPRISE_EVAL",
+    "IsoDownloadName": null,
+    "Product": "Windows 11",
+    "Version": "25H2",
+    "Channel": "Enterprise Evaluation",
+    "DownloadUrl": "https://go.microsoft.com/fwlink/?linkid=2334167&clcid=0x4009&culture=en-in&country=in",
+    "Sha256": "A61ADEAB895EF5A4DB436E0A7011C92A2FF17BB0357F58B13BBC4062E535E7B9",
+    "WindowsImages": [
+      { "Name": "Windows 11 Enterprise Evaluation",
+        "Autounattend": "windows_11_25h2_enterprise.xml" }
+    ]
+  },
+  {
+    "IsoId": "WINDOWS_11_25H2_ENTERPRISE_LTSC_EVAL",
+    "IsoDownloadName": null,
+    "Product": "Windows 11",
+    "Version": "25H2",
+    "Channel": "Enterprise LTSC Evaluation",
+    "DownloadUrl": "https://go.microsoft.com/fwlink/?linkid=2289029&clcid=0x4009&culture=en-in&country=in",
+    "Sha256": "67CEC5865EAA037A72DDC633A717A10A2BED50778862267223DDB9C60EF5DA68",
+    "WindowsImages": [
+      { "Name": "Windows 11 Enterprise LTSC Evaluation",
+        "Autounattend": null },
+      { "Name": "Windows 11 Enterprise N LTSC Evaluation",
+        "Autounattend": null }
+    ]
+  },
+  {
+    "IsoId": "WINDOWS_11_25H2_CONSUMER_MULTI",
+    "IsoDownloadName": null,
+    "Product": "Windows 11",
+    "Version": "25H2",
+    "Channel": "Consumer multi-edition",
+    "DownloadUrl": "https://software-static.download.prss.microsoft.com/dbazure/888969d5-f34g-4e03-ac9d-1f9786c66749/26200.6584.250915-1905.25h2_ge_release_svc_refresh_CLIENT_CONSUMER_x64FRE_en-us.iso",
+    "Sha256": "D141F6030FED50F75E2B03E1EB2E53646C4B21E5386047CB860AF5223F102A32",
+    "WindowsImages": [
+      { "Name": "Windows 11 Home",
+        "Autounattend": null },
+      { "Name": "Windows 11 Home N",
+        "Autounattend": null },
+      { "Name": "Windows 11 Home Single Language",
+        "Autounattend": null },
+      { "Name": "Windows 11 Education",
+        "Autounattend": null },
+      { "Name": "Windows 11 Education N",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro N",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro Education",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro Education N",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro for Workstations",
+        "Autounattend": null },
+      { "Name": "Windows 11 Pro N for Workstations",
+        "Autounattend": null }
+    ]        
+  }
+]
+
