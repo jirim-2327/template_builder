@@ -1,0 +1,78 @@
+# Packer
+*.box
+packer_cache/
+crash.log
+crash.*.log
+
+# Packer build outputs
+output/
+builds/
+
+# Redundant scripts or files ...
+tools/unused/
+
+# ISO files (large binaries)
+*.iso
+
+# Hash files, should be generated when .iso files are created
+*.sha256
+
+# SSH keys and related files
+*.pem
+*.key
+*.pub
+*id_rsa*
+*ed25519*
+authorized_keys
+# ... redundant, patern already matches
+ed25519_hyperv_vm
+ed25519_hyperv_vm.pub
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CI / GitHub metadata
+.github/
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Personal documentation (not tracked)
+BRAINSTORM.md
+ARCHITECTURE.md
+copilot-instructions.md
+agent.md
+
+# Windows
+$RECYCLE.BIN/
+*.lnk
+
+# Hyper-V VM files (if accidentally placed in repo)
+*.vhd
+*.vhdx
+*.avhd
+*.avhdx
+*.vmcx
+*.vmrs
+
+*.OpenSSH-Win64*
+
+# Explicitly whitelisted
+!*.md
+!*git_keep_folder
+
