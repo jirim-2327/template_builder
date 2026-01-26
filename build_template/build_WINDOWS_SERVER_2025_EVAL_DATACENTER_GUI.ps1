@@ -9,6 +9,6 @@ $buildPipelineScript = $(Join-Path $pipelines "Build-WindowsTemplate.ps1")
     -IsoId "WINDOWS_SERVER_2025_EVAL" `
     -ImageOption "Windows Server 2025 Datacenter Evaluation (Desktop Experience)" `
     -OverwriteDownloadedIso $false `
-    -CompareChecksums $false `
+    -CompareChecksums $true `
     -Use_No_Prompt_Iso $false `
     -OverwriteNoPromptIso $false
