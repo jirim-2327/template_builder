@@ -76,3 +76,4 @@ $RECYCLE.BIN/
 !*.md
 !*git_keep_folder
 
+local.auto.pkrvars.hcl

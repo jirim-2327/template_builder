@@ -8,8 +8,8 @@ $buildPipelineScript = $(Join-Path $pipelines "Build-WindowsTemplate.ps1")
 & $buildPipelineScript `
     -IsoId "WINDOWS_11_25H2_ENTERPRISE_EVAL" `
     -ImageOption "Windows 11 Enterprise Evaluation" `
-    -OverwriteDownloadedIso $true `
-    -CompareChecksums $false `
-    -Use_No_Prompt_Iso $true `
+    -OverwriteDownloadedIso $false `
+    -CompareChecksums $true `
+    -Use_No_Prompt_Iso $false `
     -OverwriteNoPromptIso $false
 

@@ -23,7 +23,10 @@ Must correspond to the same ISO entry as *IsoId*; only image options belonging t
 Overwrite existing downloaded .iso image.
 
 .PARAMETER OverwriteExistingSshKey
-Overwrite existing SSH key pair.
+Overwrite existing SSH key pair used by packer.
+
+.PARAMETER OverwriteExistingLocalStoreCred
+Overwrite existing local store credentials for admin-deploy.
 
 .PARAMETER CompareChecksums
 Calculates and compare images' SHA-265 checksum with original's to assure the image file was not corrupted. 
@@ -58,7 +61,7 @@ param (
     [string]$ImageOption, 
     
     [Parameter(Mandatory = $false)]
-    [bool]$OverwriteDownloadedIso = $true,
+    [bool]$OverwriteDownloadedIso = $false,
 
     [Parameter(Mandatory = $false)]
     [bool]$OverwriteExistingSshKey = $false,
@@ -70,10 +73,10 @@ param (
     [bool]$CompareChecksums = $true,
 
     [Parameter(Mandatory = $false)]
-    [bool]$Use_No_Prompt_Iso = $true,
+    [bool]$Use_No_Prompt_Iso = $false,
 
     [Parameter(Mandatory = $false)]
-    [bool]$OverwriteNoPromptIso = $true,
+    [bool]$OverwriteNoPromptIso = $false,
 
     [Parameter(Mandatory = $false)]
     [string]$NoPromptBootFile = "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\efisys_noPrompt.bin",

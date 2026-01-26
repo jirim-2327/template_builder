@@ -145,8 +145,9 @@ source "hyperv-iso" "windows_server" {
 
   # So far, boot_command is not working for me, but it may work better for someone else +
   #  don't interfere with my "no prompt" method
-  boot_wait = "20s"
-  boot_command = ["<tab><wait5s><enter><tab><enter><space><wait5s>"]
+  boot_wait = "1s"
+  boot_command = ["a<enter><wait>a<enter><wait>a<enter><wait>a<enter>"]
+  # boot_command = ["<tab><wait5s><enter><tab><enter><space><wait5s>"]
   # boot_command = ["<wait10s>a<space>a<tab>a<enter>a<space>"]
 
   first_boot_device = "DVD"
