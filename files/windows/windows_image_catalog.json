@@ -9,13 +9,13 @@
     "Sha256": "3E4FA6D8507B554856FC9CA6079CC402DF11A8B79344871669F0251535255325",
     "WindowsImages": [
       { "Name": "Windows Server 2022 Standard Evaluation",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_standard_core.xml" },
       { "Name": "Windows Server 2022 Standard Evaluation (Desktop Experience)",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_standard_desktop.xml" },
       { "Name": "Windows Server 2022 Datacenter Evaluation",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_datacenter_core.xml" },
       { "Name": "Windows Server 2022 Datacenter Evaluation (Desktop Experience)",
-        "Autounattend": null }
+        "Autounattend": "windows_server_2022_datacenter_desktop.xml" }
     ]
   },
   {
@@ -28,13 +28,13 @@
     "Sha256": "4F1457C4FE14CE48C9B2324924F33CA4F0470475E6DA851B39CCBF98F44E7852",
     "WindowsImages": [
       { "Name": "Windows Server 2022 Standard Evaluation",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_standard_core.xml" },
       { "Name": "Windows Server 2022 Standard Evaluation (Desktop Experience)",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_standard_desktop.xml" },
       { "Name": "Windows Server 2022 Datacenter Evaluation",
-        "Autounattend": null },
+        "Autounattend": "windows_server_2022_datacenter_core.xml" },
       { "Name": "Windows Server 2022 Datacenter Evaluation (Desktop Experience)",
-        "Autounattend": null }
+        "Autounattend": "windows_server_2022_datacenter_desktop.xml" }
     ]
   },
   { 

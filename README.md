@@ -19,20 +19,38 @@
 - Provisioned `svc-deploy` admin\service account during first boot; to be used with pub\priv key authentication via SSH.
 
 ## Prerequisites
-- Windows 10/11/Server with Hyper-V enabled.
-- Packer 1.8+ on PATH.
-- PowerShell 5.1+ (PS 7 recommended).
-- Windows ADK (for `efisys_noPrompt.bin`) - script by default expects ADK at `C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\` (override via `-NoPromptBootFile`).
-- Sufficient disk space (~30 GB per template + ISOs).
-- SSH client (Should be provided with Windows feature OpenSSH)
+ - Windows 10/11/Server with Hyper-V enabled.
+ - Packer 1.8+ on PATH.
+ - PowerShell 5.1+ (PS 7 recommended).
+ - Sufficient disk space (~30 GB per template + ISOs).
+ - SSH client (Should be provided with Windows feature OpenSSH)
+ - By default, the normal/original ISO is used (no_prompt ISO is **not** generated unless explicitly enabled). To allow automated boot from original ISO:
+    - Secure Boot must be **disabled** for the VM.
+    - No other Hyper-V connection to the VM must be open during build (close all VMConnect/console windows).
+    - Enhanced Session must be **disabled** (this is required).
+
+**Optional: If you want to use the no_prompt ISO method (to skip the "Press any key to boot..." prompt):**
+  - Enable `-Use_No_Prompt_Iso $true`.
+  - Windows ADK (for `efisys_noPrompt.bin`) - script expects ADK at `C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\` (override via `-NoPromptBootFile`).
 
 ## What It Does
+
 ### 1) Downloads the selected Windows ISO and verifies SHA256.
 
 Works for Windows Server 2025 Evaluation. Expected SHA256 related to download link is defined in `files\windows\windows_image_catalog.json`
 
-### 2) Generates custom no-prompt ISO variant
-Uses no-prompt boot file (`efisys_noPrompt.bin`) from Windows ADK, to skip “Press any key to boot…” prompts reliably (as Packer `boot_command` may not always work).
+### 2) Uses the normal/original ISO by default / or uses the no_prompt if specified
+By default, the process uses the normal/original ISO for installation. No no_prompt ISO is generated unless you explicitly enable it.
+
+**If you want to use the no_prompt ISO method (to skip the "Press any key to boot..." prompt):**
+  - Enable `-Use_No_Prompt_Iso $true`.
+  - Windows ADK (for `efisys_noPrompt.bin`) is required.
+
+**When using the normal/original ISO (default):**
+  - Secure Boot must be **disabled** for the VM
+  - No other Hyper-V connection to the VM is open (close all VMConnect/console windows)
+  - Enhanced Session is **disabled**
+These requirements are necessary to allow automated boot from the original ISO.
 
 ### 3) Builds a secondary (provisioning) ISO with autounattend.xml, unattend.xml, bootstrap and first-boot scripts.
 **Autounattend selection:** build-specific `autounattend.xml` (Standard\Datacenter, Core\GUI) is copied as `autounattend.xml` to `secondary_iso.iso`.
@@ -41,7 +59,8 @@ Uses no-prompt boot file (`efisys_noPrompt.bin`) from Windows ADK, to skip “Pr
 ### 4) Runs Packer (Hyper-V provider, Gen2, UEFI) using primary + secondary ISOs to create a ready-to-use template.
 
 Installation flow is driven by the autounattend from step 3; customization lives in `bootstrap.ps1`.
-By virtue of the no_prompt ISO from step 2, no `boot_command` or manual intervention is needed.
+Packer enters `boot_command` into Hyper-V VM connection windows.
+If no_prompt ISO from step 2, no `boot_command` or manual intervention is needed then.
 `autounattend.xml` calls `bootstrap.ps1`. `bootstrap.ps1`:
 * Installs Scoop (package manager, can be used for automated provisioning on finalized VM) 
 * PowerShell 7 (pwsh)
@@ -55,7 +74,7 @@ After SSH connection is established, Packer connects and runs script to prepare 
 ### 5) Prepares the template for capture (sysprep).
 Sysprep generalizes the image (referencing `unattend.xml`), then Packer exports the template as `.vhdx`.
 
----
+----
 
 ### 6) Post-build
 From template, new VMs are created using **differential disks** (parent/child VHDX).
@@ -68,6 +87,7 @@ Then, when VM is first started:
 **Unattend.xml orchestrates first boot**: Runs `FirstBoot.ps1` which creates `svc-deploy` admin account with random password (logged), sets up SSH authorized_keys structure for offline injection, and finalizes SSH configuration.
 
 ## Usage (Example)
+
 Clone or otherwise download repo.
 
 Navigate to `<repo_root>\build_template`.
@@ -89,6 +109,11 @@ You can switch Windows editions — from Standard → Datacenter or Evaluation �
 
 The scripts are just "wrappers" to call `...\pipelines\Build-WindowsTemplate.ps1`. There is no need to call the pipeline directly with parameters, as all implemented options are covered. Run `Get-Help .\Build-WindowsTemplate.ps1 -Detailed` or check script itself for details.
 
+
+**By default, the build uses the normal/original ISO (no_prompt ISO is not generated).**
+
+**If you want to use the no_prompt ISO method (to skip the "Press any key to boot..." prompt), set `-Use_No_Prompt_Iso $true`.**
+
 Here is explanation of some parameters, in case you need to run them more than once or adjust:
 ```powershell
 Build-WindowsTemplate.ps1 `
@@ -96,10 +121,10 @@ Build-WindowsTemplate.ps1 `
     -ImageOption "Windows Server 2025 Datacenter Evaluation" ` # one of possible images stored in .wim file on .iso
     -OverwriteDownloadedIso $false `
     -CompareChecksums $true ` # validates download, makes sense to change to $false after first download
-    -Use_No_Prompt_Iso $true `
-    -OverwriteNoPromptIso $false `
+    -Use_No_Prompt_Iso $false ` # $false by default => uses original .iso (no no_prompt ISO generated)
+    -OverwriteNoPromptIso $false ` # only needed if Use_No_Prompt_Iso is $true
     -NoPromptBootFile = "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\efisys_noPrompt.bin" 
-    # NoPromptBootFile defaults to where Windows ADK is expected to be installed, needs only efisys_noPrompt.bin
+    # Only needed if Use_No_Prompt_Iso is $true; defaults to where Windows ADK is expected to be installed
 ```
 
 After build is done, check output for generated artifacts, namely `output\packer\windows_server_2025_..your...build\` for .vhdx.
@@ -158,6 +183,11 @@ ssh -i $env:USERPROFILE\.ssh\ed25519_svc-deploy_hyperv_vm svc-deploy@<IP of new 
 - Adjust Packer variables in `packer\windows\*.auto.pkrvars.hcl` (CPU, RAM, switch).
 
 ## Technical Notes
+
+### Original ISO vs no_promt
+
+By default, the normal/original ISO method is used. If it doesn't work in your environment, use the no_prompt ISO method (`-Use_No_Prompt_Iso $true`).
+See [Prerequisites](#prerequisites) for requirements.
 
 ### Windows Updates
 **Updates** aren't provided during instalation \ build.

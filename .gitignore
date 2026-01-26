@@ -75,4 +75,3 @@ $RECYCLE.BIN/
 # Explicitly whitelisted
 !*.md
 !*git_keep_folder
-
