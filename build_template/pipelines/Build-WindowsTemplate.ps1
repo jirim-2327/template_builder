@@ -24,9 +24,11 @@ Overwrite existing downloaded .iso image.
 
 .PARAMETER OverwriteExistingSshKey
 Overwrite existing SSH key pair used by packer.
+Default $false.
 
 .PARAMETER OverwriteExistingLocalStoreCred
 Overwrite existing local store credentials for admin-deploy.
+Default $false.
 
 .PARAMETER CompareChecksums
 Calculates and compare images' SHA-265 checksum with original's to assure the image file was not corrupted. 
@@ -67,6 +69,9 @@ param (
     [bool]$OverwriteExistingSshKey = $false,
 
     [Parameter(Mandatory = $false)]
+    [bool]$OverwriteExistingLocalStoreCred = $false,
+
+    [Parameter(Mandatory = $false)]
     [bool]$CompareChecksums = $true,
 
     [Parameter(Mandatory = $false)]
@@ -99,6 +104,7 @@ $packerOutput = Join-Path $repoRoot "output\packer"
 $windowsImageCatalog = Join-Path $repoRoot "files\windows\windows_image_catalog.json"
 $autounattendDirectory = Join-Path $repoRoot "files\windows\autounattend"
 
+
 # Block with scripts' call strings
 $newStructuredDirectory = Join-Path $helpers "New-StructuredDirectory.ps1"
 $showTreeStructure = Join-Path $helpers "Show-TreeStructure.ps1"
@@ -107,6 +113,7 @@ $downloadWindowsIso = Join-Path $helpers "Download-WindowsIso.ps1"
 $validateFileHash = Join-Path $helpers "Validate-FileHash.ps1"
 $newNoPromptIso = Join-Path $helpers "New-NoPromptIso.ps1"
 $ensureSshKeyPair = Join-Path $helpers "Ensure-SshKeyPair.ps1"
+$newLocalStoreCredentials = Join-Path $helpers "New-LocalStoreCredentials.ps1"
 $invokePackerBuild = Join-Path $helpers "Invoke-PackerBuild.ps1"
 #endregion
 
@@ -151,6 +158,7 @@ if ($CompareChecksums) {
 }
 #endregion
 
+#region No Prompt ISO
 if ($Use_No_Prompt_Iso) {
     #region Create No Prompt ISO
     $downloadedIsoBaseName = (Get-Item $downloadedIso).BaseName
@@ -241,6 +249,26 @@ Remove-Item $secondaryIso -Force -ErrorAction SilentlyContinue | Out-Null
     -Force
 #endregion
 
+#region Credential Manager
+# Ensure Credential Manager entry for admin-deploy exists (helper handles module check)
+# Packer then (when connection via SSH works) runs inline Create-LocalUser and passes these credentials  
+if ($OverwriteExistingLocalStoreCred) {
+    & $newLocalStoreCredentials `
+        -CredentialTarget "packer_admin-deploy" `
+        -UserName "admin-deploy" `
+        -Force
+} else {
+    & $newLocalStoreCredentials `
+        -CredentialTarget "packer_admin-deploy" `
+        -UserName "admin-deploy"
+}
+# Read admin-deploy credential from Windows Credential Manager for Packer variables
+Import-Module TUN.CredentialManager
+$adminDeployCredential = Get-StoredCredential -Target "packer_admin-deploy"
+$adminDeployUsername = $adminDeployCredential.UserName
+$adminDeployPassword = $adminDeployCredential.GetNetworkCredential().Password
+#endregion
+
 #region Packer Build
 $runPackerBuild = $true 
 # 
@@ -258,7 +286,8 @@ if ($runPackerBuild) {
         -IsoChecksum $isoChecksum `
         -SecondaryIso $secondaryIso `
         -SshPrivateKeyFile $sshPrivateKeyFile `
-        -OutputDirectory $packerOutput
+        -OutputDirectory $packerOutput `
+        -AdminDeployPassword $adminDeployPassword
 }
 #endregion 
 

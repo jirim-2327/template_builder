@@ -17,23 +17,30 @@
 - Not hardened; intended for lab/test Hyper-V use. **But can be customized to provide hardening.**
 - Uses Packer, works on Hyper-V, connects to VM via SSH (SSH communicator is used, not WinRM).
 - Provisioned `svc-deploy` admin\service account during first boot; to be used with pub\priv key authentication via SSH.
+- Provisioned `admin-deploy` admin account, using Windows Credential Manager. Allows PowerShell Direct connection to the VM, even if the VM has no network connectivity, provided Integration Services are enabled.
 
 ## Prerequisites
  - Windows 10/11/Server with Hyper-V enabled.
  - Packer 1.8+ on PATH.
  - PowerShell 5.1+ (PS 7 recommended).
  - Sufficient disk space (~30 GB per template + ISOs).
- - SSH client (Should be provided with Windows feature OpenSSH)
+ - (optional) SSH client (Should be provided with Windows feature OpenSSH)
+    - In case you want to connect directly to VM using ssh
  - By default, the normal/original ISO is used (no_prompt ISO is **not** generated unless explicitly enabled). To allow automated boot from original ISO:
     - Secure Boot must be **disabled** for the VM.
     - No other Hyper-V connection to the VM must be open during build (close all VMConnect/console windows).
-    - Enhanced Session must be **disabled** (this is required).
+    - Enhanced Session must be **disabled**.
+
+- For PowerShell Direct (after template is build, to manage new VM without network or IP):
+  - VM must be running and have Hyper-V integration services enabled.
+  - Requires PowerShell module `TUN.CredentialManager`, to install, run: `Install-Module -Name TUN.CredentialManager`
 
 **Optional: If you want to use the no_prompt ISO method (to skip the "Press any key to boot..." prompt):**
   - Enable `-Use_No_Prompt_Iso $true`.
   - Windows ADK (for `efisys_noPrompt.bin`) - script expects ADK at `C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\` (override via `-NoPromptBootFile`).
 
 ## What It Does
+
 
 ### 1) Downloads the selected Windows ISO and verifies SHA256.
 
@@ -59,8 +66,8 @@ These requirements are necessary to allow automated boot from the original ISO.
 ### 4) Runs Packer (Hyper-V provider, Gen2, UEFI) using primary + secondary ISOs to create a ready-to-use template.
 
 Installation flow is driven by the autounattend from step 3; customization lives in `bootstrap.ps1`.
-Packer enters `boot_command` into Hyper-V VM connection windows.
-If no_prompt ISO from step 2, no `boot_command` or manual intervention is needed then.
+If **original ISO** from step 2 is used: Packer enters `boot_command` into Hyper-V VM connection windows.
+If **no_prompt ISO** from step 2 is used, no `boot_command` or manual intervention is needed.
 `autounattend.xml` calls `bootstrap.ps1`. `bootstrap.ps1`:
 * Installs Scoop (package manager, can be used for automated provisioning on finalized VM) 
 * PowerShell 7 (pwsh)
@@ -69,7 +76,7 @@ If no_prompt ISO from step 2, no `boot_command` or manual intervention is needed
 * Runs `Enable-Connector-SSH_packer.ps1` to install/configure sshd for Packer and later access.
 * Copies `unattend.xml` to `C:\Windows\System32\Sysprep\`, `unattend.xml` defines first-boot behavior.
 
-After SSH connection is established, Packer connects and runs script to prepare template for sysprep (currently just dummy script).
+After SSH connection is established, Packer connects and runs a script to prepare the template for sysprep (currently just a dummy script). Packer also creates the `admin-deploy` account in the VM, injecting a password securely from Windows Credential Manager.
 
 ### 5) Prepares the template for capture (sysprep).
 Sysprep generalizes the image (referencing `unattend.xml`), then Packer exports the template as `.vhdx`.
@@ -85,6 +92,9 @@ See `usage_examples\Create-VMwithSshKey.ps1` for complete workflow example.
 
 Then, when VM is first started:
 **Unattend.xml orchestrates first boot**: Runs `FirstBoot.ps1` which creates `svc-deploy` admin account with random password (logged), sets up SSH authorized_keys structure for offline injection, and finalizes SSH configuration.
+
+**PowerShell Direct connection**
+And\or you or automation tool like Terraform can connect to VM using `admin-deploy account`.
 
 ## Usage (Example)
 
@@ -127,8 +137,34 @@ Build-WindowsTemplate.ps1 `
     # Only needed if Use_No_Prompt_Iso is $true; defaults to where Windows ADK is expected to be installed
 ```
 
-After build is done, check output for generated artifacts, namely `output\packer\windows_server_2025_..your...build\` for .vhdx.
+### Post Build:
+After build is done, check output for generated artifacts, namely `output\packer\windows_server_2025_..your...build\` for .vhdx. Can be used as template now.
 
+You (and automation) can connect into newly build machines by two ways:
+#### Using PowerShell Direct:
+This is convenient if the new VM build from the template have **no IP address or no network set up**.
+Uses account `admin-deploy` with pre-generated password stored in Credential Manager.
+You can run e.g. `Invoke-Command`, from Terraform, using existing credentials: 
+
+```hcl
+resource "null_resource" "set_vm_ip" {
+  provisioner "local-exec" {
+    command = 
+      powershell -NoProfile -Command "Invoke-Command -VMName 'test_VM_2' -Credential (Get-StoredCredential -Target 'packer_admin-deploy') -ScriptBlock {
+          # Your PowerShell code here, e.g.:
+          Get-NetIPAddress
+        }"
+  }
+}
+```
+
+Use `Enter-PSSession` for interactive session; credentials for the `admin-deploy` account are securely retrieved from Windows Credential Manager, so you never need to pass them as plain text or via "pop-up" credential prompt.
+
+```powershell
+Enter-PSSession -VMName <name of your VM> -Credential (Get-StoredCredential -Target "packer_admin-deploy") 
+```
+
+#### Using SSH:
 Use as parent disk for new differential, inject there `<drive>\\bootstrap\svc-deploy\authorised_keys` (with content of `$env:USERPROFILE\.ssh\ed25519_svc-deploy_hyperv_vm.pub`) to be used by `svc-deploy`, set new VM to boot from new disk.
 
 This can be done by script or via Terraform (example using `null_resource` with `local-exec` provisioner):
@@ -158,6 +194,7 @@ ssh -i $env:USERPROFILE\.ssh\ed25519_svc-deploy_hyperv_vm svc-deploy@<IP of new 
   - `New-IsoFile.ps1` - Creates new ISO
   - `Invoke-PackerBuild.ps1` — Launches Packer with validated variables
   - `Ensure-SshKeyPair.ps1` — Generates SSH keys for Packer communicator
+  - `New-LocalStoreCredentials.ps1`  — Creates `admin-deploy` and store it in Credential Store 
 - `top_dir` — Determines top directory of repo  
 
 ### Configuration & Content
@@ -223,6 +260,14 @@ If the SHA256 of the no_prompt ISO were deterministic, it could verify whether `
 
 Anyway, so far, I have not experienced any issues with no_prompt iso, so validation is probably not necessary. 
 
+### PowerShell Direct Connection with `admin-deploy`
+- Allows connection to VM (post build, VM made from template) even if it have no assigned IP address, which is often the case. I choosed this method as it is enough for home labs and test environments and still much better than using plain text password. 
+- Can be used manually or with Terraform or other automation.
+- No password in plain text or prompt asking for credentials:
+    - Password is pre-generated by script and stored in Windows native Credential Manager.
+    - User `admin-deploy` is created by Packer and credentials are passed. 
+    - Requires module `TUN.CredentialManager`
+
 ### SSH Connection
 
 **During build**:
@@ -264,4 +309,5 @@ Evaluation period starts when VM is build.
 
 ### Third-Party Scripts
 `New-IsoFile.ps1` - Slight edit of [script by TheDotSource ](https://github.com/TheDotSource/New-ISOFile)
+
 
