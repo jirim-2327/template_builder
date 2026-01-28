@@ -122,6 +122,19 @@ variable "enable_mac_spoofing" {
   default     = false
 }
 
+variable "admin_deploy_username" {
+  type        = string
+  description = "Username for admin deployment account"
+  default     = "admin-deploy"
+}
+
+variable "admin_deploy_password" {
+  type        = string
+  description = "Password for admin deployment account"
+  sensitive   = true
+  default     = ""
+}
+
 source "hyperv-iso" "windows_server" {
   vm_name = var.vm_name
 
@@ -184,6 +197,18 @@ build {
     inline = [
       "Write-Host 'Waiting for system to stabilize...'",
       "Start-Sleep -Seconds 10"
+    ]
+  }
+
+  # Create admin-deploy account with injected password
+  provisioner "powershell" {
+    inline = [
+      "$user = '${var.admin_deploy_username}'",
+      "$password = '${var.admin_deploy_password}'",
+      "$secPassword = ConvertTo-SecureString $password -AsPlainText -Force",
+      "New-LocalUser -Name $user -Password $secPassword -PasswordNeverExpires -Description 'Admin deployment account'",
+      "Add-LocalGroupMember -Group 'Administrators' -Member $user",
+      "$password = $null; $secPassword = $null"
     ]
   }
 
