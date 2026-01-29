@@ -55,7 +55,7 @@ Write-Host "output_base_path: $OutputDirectory" -ForegroundColor DarkYellow
 
 Push-Location $PackerDir
 try {
-    Write-Host "Running: packer $($packerArgs -join ' ')" -ForegroundColor DarkYellow
+    #Write-Host "Running: packer $($packerArgs -join ' ')" -ForegroundColor DarkYellow
     Write-Host ""
     & packer @packerArgs
 }
