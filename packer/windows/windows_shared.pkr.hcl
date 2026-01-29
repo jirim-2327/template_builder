@@ -212,6 +212,8 @@ build {
     ]
   }
 
+
+
   # Runs RIGHT BEFORE sysprep to ensure clean state (Dummy script for now)
   provisioner "powershell" {
     inline = [

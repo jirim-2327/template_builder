@@ -4,7 +4,8 @@ param(
     [string]$PrimaryIso,
     [string]$SecondaryIso,
     [string]$SshPrivateKeyFile,
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+    [string]$AdminDeployPassword
 )
 
 $repoRoot = $PSScriptRoot
@@ -34,6 +35,7 @@ $packerArgs = @(
     "-var", "secondary_iso=$SecondaryIso"
     "-var", "ssh_private_key_file=$SshPrivateKeyFile"
     "-var", "output_base_path=$OutputDirectory"
+    "-var", "admin_deploy_password=$AdminDeployPassword"
 )
 
 $packerArgs += $packerTemplate
